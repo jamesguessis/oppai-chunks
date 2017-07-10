@@ -125,7 +125,7 @@ def parse_meta(metadata):
     return bm_head
 
 
-def oppai(bmap, window_length=3000, step_size=500):
+def oppai(bmap, mods=0, window_length=3000, step_size=500):
     """Open beatmap and process
 
     Runs oppai on chunks (default 30 sec windows) of the beatmap at regular
@@ -161,7 +161,7 @@ def oppai(bmap, window_length=3000, step_size=500):
             out = ''.join(window)
             with open(tmpdir + '/tmp.osu', 'w', encoding='utf-8') as tmp:
                 tmp.write(bm_head + out)
-            oppai_out = get_pyoppai(tmpdir + '/tmp.osu')
+            oppai_out = get_pyoppai(tmpdir + '/tmp.osu', mods=mods)
             oppai_out['time'] = seek
             results.append(oppai_out)
 
@@ -171,7 +171,7 @@ def oppai(bmap, window_length=3000, step_size=500):
                         if int(x.split(',')[2]) > seek]
     return results
 
-def get_pyoppai(btmap_file): # Pyoppai implementation rather than subprocess
+def get_pyoppai(btmap_file, mods=0): # Pyoppai implementation rather than subprocess
     btmap = btmap_file
     ctx = pyoppai.new_ctx()
     b = pyoppai.new_beatmap(ctx)
@@ -179,7 +179,7 @@ def get_pyoppai(btmap_file): # Pyoppai implementation rather than subprocess
     buf = pyoppai.new_buffer(BUFSIZE)
     pyoppai.parse(btmap, b, buf, BUFSIZE, False, btmap)
     dctx = pyoppai.new_d_calc_ctx(ctx)
-    pyoppai.apply_mods(b, 0)
+    pyoppai.apply_mods(b, mods)
     stars, aim, speed, _, _, _, _ = pyoppai.d_calc(dctx, b)
     cs, od, ar, hp = pyoppai.stats(b)
     combo = pyoppai.max_combo(b)
