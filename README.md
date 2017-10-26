@@ -1,26 +1,24 @@
 # oppai-chunks
-http://rarelyupset.com/oppai/
+Originally forked from [here](https://github.com/derekxwu/oppai-chunks) to use pyoppai for a massive speed boost. 
+Now I've rewritten it to use pyttanko with strains instead of difficulty.
 
-Calculate the difficulty over time of a beatmap with moving windows.
-
-Runs on Python 3 and uses [oppai](https://github.com/Francesco149/oppai)
+Runs on Python 3 and uses [pyttanko](https://github.com/Francesco149/pyttanko)
 
 ## Usage:
 
 ### From the command line
-`./oppai_chunks.py beatmap [window [step]]`
+`./oppai_chunks.py beatmap [mod bitwise]`
 
 `beatmap` is the .osu file you want to analyze.
-`window` is the window size to use, in milliseconds.
 
-`step` is the step size to use, in milliseconds.
+`mod bitwise` is the bitwise for the mod combination(s) you want to apply.
 
-For example, `./oppai_chunks.py "haitai.osu" 12000 2000` will calculate the difficulty from 0:00 to 0:12, then 0:02 to 0:14, and so on.
+For example, `./oppai_chunks.py "haitai.osu" 24` will calculate the strains for the map with HDHR.
 
 ### As a python module
 ```
-from oppai_chunks import oppai
+from oppai_chunks import get_strains
 ...
-oppai(beatmap, window=30000, step=5000)
+get_strains(beatmap, mods=24)
 ```
-The arguments are the same as above. Here, the beatmap can be given as a path (`oppai('/path/to/beatmap.osu')`), or as the contents of an opened file (`oppai(file.read())`, `oppai(file.readlines())`). The output is a list of `(time, overall stars, aim stars, speed stars)` tuples.
+The arguments are the same as above. Here, the beatmap can be given as a path (`oppai('/path/to/beatmap.osu')`). The output is a list of `(time, overall stars, aim stars, speed stars)` tuples.
