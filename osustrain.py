@@ -4,16 +4,19 @@ import pyttanko
 import matplotlib.pyplot as plt
 
 def get_strains(bmap_file, mods:int=0):
-    """Uses strain values from each hitobject
-    to create lists of strains in a way
+    """Uses strain values from each hitobject 
+    to create lists of strains in a way 
     I see fit"""
     bmap = get_pyttanko(bmap_file, mods)
     speed, aim, total, times = [], [], [], []
     seek = 0
     while seek <= bmap.hitobjects[-1].time:
-        window = [obj for obj in bmap.hitobjects if (obj.time >= seek and obj.time <= seek + 30000)]
+        window = []
+        for obj in bmap.hitobjects:
+            if (obj.time >= seek and obj.time <= seek + 30000):
+                window.append(obj.strains)
         wspeed, waim, wtotal = [], [], []
-        for strain in [obj.strains for obj in window]:
+        for strain in window:
             wspeed.append(strain[0])
             waim.append(strain[1])
             wtotal.append(sum(strain))
@@ -34,8 +37,8 @@ def graph(bmap_file, mods:int=0):
     plt.show()
 
 def get_pyttanko(bmap_file, mods:int):
-    """Uses pyttanko to parse the map
-    each hitobject contains the strain values
+    """Uses pyttanko to parse the map 
+    each hitobject contains the strain values. 
     Thanks Francesco"""
     bmap = pyttanko.parser().map(open(bmap_file))
     stars = pyttanko.diff_calc().calc(bmap, mods=mods)
@@ -50,5 +53,8 @@ if __name__ == '__main__':
     sys.stdout.write("Analyzing beatmap...\n")
     speed, aim, total, times = get_strains(sys.argv[1], mods)
     for i in range(len(speed)):
-        sys.stdout.write('{:>8}: {:>8} |{:>8} |{:>8}\n'.format(times[i], round(speed[i], 2), round(aim[i], 2), round(total[i], 2)))
+        sys.stdout.write('{:>8}: {:>8} |{:>8} |{:>8}\n'.format(times[i], 
+                                                               round(speed[i], 2), 
+                                                               round(aim[i], 2), 
+                                                               round(total[i], 2)))
 
