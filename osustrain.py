@@ -13,7 +13,7 @@ def get_strains(bmap_file, mods:int=0):
     while seek <= bmap.hitobjects[-1].time:
         window = []
         for obj in bmap.hitobjects:
-            if (obj.time >= seek and obj.time <= seek + 30000):
+            if (obj.time >= seek and obj.time <= seek + 3000):
                 window.append(obj.strains)
         wspeed, waim, wtotal = [], [], []
         for strain in window:
