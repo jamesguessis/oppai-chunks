@@ -7,11 +7,11 @@
  Run in CLI as ./oppai-chunks.py <path_to_beatmap>
  Import oppai() and run oppai('path_to_beatmap')
 """
+import pyttanko
 import codecs
 import json
-import subprocess
 import sys
-import tempfile
+import io
 
 # Replace if oppai-json is not in your PATH
 OPPAI_PATH = "oppai"
@@ -156,40 +156,31 @@ def oppai(bmap, window_length=30000, step_size=5000):
 
     results = []  # Array of (time, stars, aim stars, speed stars) tuples
     seek = 0  # Time in ms
-    with tempfile.TemporaryDirectory() as tmpdir:
-        while hitcircles:
-            # Slice out window of beatmap
-            try:
-                window = [x for x in hitcircles
-                          if int(x.split(',')[2]) < seek + window_length]
-            except IndexError:
-                raise ParseError('Unexpected line in [HitObjects] section')
-            if len(window) == 0:
-                results.append((seek, 0.0, 0.0, 0.0))
-                seek = seek + 5000
-                hitcircles = [x for x in hitcircles
-                              if int(x.split(',')[2]) > seek]
-                continue
-            out = ''.join(window)
-
-            with open(tmpdir + '/tmp.osu', 'w', encoding='utf-8') as tmp:
-                tmp.write(bm_head + out)
-
-            # Use omkelderman's json-output fork of oppai
-            # https://github.com/omkelderman/oppai/tree/json-output
-            oppai_out = subprocess.check_output(
-                [OPPAI_PATH, tmpdir + '/tmp.osu'])
-            oppai_out = json.loads(oppai_out.decode())
-
-            results.append((seek,
-                            float(oppai_out['stars']),
-                            float(oppai_out['aim_stars']),
-                            float(oppai_out['speed_stars'])))
-
-            # Step to next window
-            seek = seek + step_size
+    while hitcircles:
+        # Slice out window of beatmap
+        try:
+            window = [x for x in hitcircles
+                      if int(x.split(',')[2]) < seek + window_length]
+        except IndexError:
+            raise ParseError('Unexpected line in [HitObjects] section')
+        if len(window) == 0:
+            results.append((seek, 0.0, 0.0, 0.0))
+            seek = seek + 5000
             hitcircles = [x for x in hitcircles
                           if int(x.split(',')[2]) > seek]
+            continue
+        out = ''.join(window)
+        bmap = pyttanko.parser().map(io.StringIO(bm_head + out))
+        stars = pyttanko.diff_calc().calc(bmap)
+        
+        results.append((seek,
+                        float(stars.total),
+                        float(stars.aim),
+                        float(stars.speed)))
+        # Step to next window
+        seek = seek + step_size
+        hitcircles = [x for x in hitcircles
+                      if int(x.split(',')[2]) > seek]
     return results
 
 
